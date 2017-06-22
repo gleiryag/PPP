@@ -7,6 +7,11 @@
 #include<memory>
 #include<iostream>
 #include<initializer_list>
+#include <sys/time.h>
+#include <sched.h>
+
+struct timeval *Tps,*Tpf;
+struct timezone *Tzp;
 
 /*
  F - is a function pointer.
@@ -262,10 +267,35 @@ std::ostream& operator<<(std::ostream& os,Source<T> const & s){
 	return s.print(os);
 }
 
+struct DefaultPipeConfiguration {
+
+	void thread_pinning_policy(pthread_t pthread,int id){
+
+		return;
+	}
+	
 
 
+};
 
-template<typename F>
+
+template<int N>
+struct ConditionalPinning : DefaultPipeConfiguration {
+	
+	void thread_pinning_policy(pthread_t pthread,int id){
+		static_assert(N>0,"N must be positive non-zero number");
+		int cpu_assignment = id%N;
+		cpu_set_t set;
+	
+		CPU_ZERO(&set);
+		CPU_SET(cpu_assignment,&set);	
+		pthread_setaffinity_np(pthread,sizeof(cpu_set_t),&set);
+		return;
+	}
+};
+
+
+template<typename F,typename ConfigurationAlg = DefaultPipeConfiguration>
 class ThreadHandler {
 
 	using InputSource  = Source<input_t<F>>;
@@ -275,15 +305,16 @@ class ThreadHandler {
 	std::shared_ptr<pthread_t> thread_ptr;
 	InputSource isource;
 	OutputSource osource;
-
+	ConfigurationAlg algorithms;
+	int id;
 	
 	
 
 	static void* static_run(void* class_t){ 
 
-		ThreadHandler& handler = *(static_cast<ThreadHandler<F>*>(class_t));
+		ThreadHandler& handler = *(static_cast<ThreadHandler<F,ConfigurationAlg>*>(class_t));
 		handler.run();
-		//delete &handler; 
+		delete &handler; 
 		return 0;
 		
 	}
@@ -307,6 +338,7 @@ class ThreadHandler {
 		}
 
 		osource.end_stream();
+		gettimeofday (Tpf, Tzp); 
 	}
 
 	
@@ -314,25 +346,24 @@ class ThreadHandler {
 
 	public : 
 
-	ThreadHandler(InputSource& source,F f) { 
+	ThreadHandler(InputSource& source,F f,int i) { 
 
 		this->f = f;
 		isource=source;
-
+		id = i;
 		thread_ptr.reset(new pthread_t);
-
-
+		algorithms.thread_pinning_policy(*thread_ptr,id);
+		
 	}
 
 	
 
 	OutputSource destroySource(){
-		ThreadHandler<F>* ptr = new ThreadHandler<F>(std::move(*this));
-
-		if(pthread_create(ptr->thread_ptr.get(), NULL,static_run,ptr)){
+		
+		if(pthread_create(thread_ptr.get(), NULL,static_run,this)){
 			throw new std::bad_alloc;
 		}
-		return ptr->osource;	
+		return osource;	
 	}
 
 	std::ostream& print(std::ostream & os) const {
@@ -354,12 +385,12 @@ std::ostream& operator<<(std::ostream& os,ThreadHandler<T> const & s){
  Val - is an input value to F.
 calls F supplying the value val to it.
 */
-template<typename F>
-Source<return_t<F>> parallel_call(Source<input_t<F>>& input,F f){
+template<typename ConfigurationAlg = DefaultPipeConfiguration, typename F>
+Source<return_t<F>> parallel_call(int id,Source<input_t<F>>& input,F f){
 
-	auto handler = ThreadHandler<F>(input,f);
+	auto handler = new ThreadHandler<F,ConfigurationAlg>(input,f,id);
 
-	return handler.destroySource();
+	return handler->destroySource();
 
 }
 
@@ -370,22 +401,22 @@ Source<return_t<F>> parallel_call(Source<input_t<F>>& input,F f){
 calls functions types in a pack with leftmost precedence. 
 */
 
-template<typename F,typename... Functions>
-Source<return_t<F>> parallel_call(Source<unfold_input_t<Functions...>>& input,F f,Functions... remain_functions_ptrs){
+template<typename ConfigurationAlg = DefaultPipeConfiguration,typename F,typename... Functions>
+Source<return_t<F>> parallel_call(int id,Source<unfold_input_t<Functions...>>& input,F f,Functions... remain_functions_ptrs){
 	
-	auto pipe_output = parallel_call(input,remain_functions_ptrs...);
+	auto pipe_output = parallel_call<ConfigurationAlg>(id+1,input,remain_functions_ptrs...);
 
-	auto handler = ThreadHandler<F>(pipe_output,f);
+	auto handler = new ThreadHandler<F,ConfigurationAlg>(pipe_output,f,id);
 	
-	return handler.destroySource();
+	return handler->destroySource();
 
 }
 
 
 
-template<typename... Functions>
+template<typename ConfigurationAlg = DefaultPipeConfiguration,typename... Functions>
 check_function_pack_t<Source<unfold_return_t<Functions...>>, Functions...> p_pipeline(Source<unfold_input_t<Functions...>>& input,Functions... functions_ptrs){
-	return parallel_call(input,functions_ptrs...);
+	return parallel_call<ConfigurationAlg>(0,input,functions_ptrs...);
 
 
 }
