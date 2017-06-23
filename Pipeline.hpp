@@ -86,6 +86,7 @@ struct pthread_mutex_deleter{
 
 
 
+
 template<typename T>
 class Source {
 
@@ -270,10 +271,13 @@ std::ostream& operator<<(std::ostream& os,Source<T> const & s){
 struct DefaultPipeConfiguration {
 
 	void thread_pinning_policy(pthread_t pthread,int id){
-
 		return;
 	}
 	
+	void thread_detach_policy(pthread_t pthread,int id){
+
+		pthread_detach(pthread);
+	}
 
 
 };
@@ -286,10 +290,11 @@ struct ConditionalPinning : DefaultPipeConfiguration {
 		static_assert(N>0,"N must be positive non-zero number");
 		int cpu_assignment = id%N;
 		cpu_set_t set;
-	
+		
 		CPU_ZERO(&set);
 		CPU_SET(cpu_assignment,&set);	
 		pthread_setaffinity_np(pthread,sizeof(cpu_set_t),&set);
+		
 		return;
 	}
 };
@@ -302,20 +307,21 @@ class ThreadHandler {
 	using OutputSource = Source<return_t<F>>;
 
 	F f;
-	std::shared_ptr<pthread_t> thread_ptr;
 	InputSource isource;
 	OutputSource osource;
 	ConfigurationAlg algorithms;
 	int id;
-	
+	std::shared_ptr<pthread_t> thread_ptr;
 	
 
 	static void* static_run(void* class_t){ 
 
 		ThreadHandler& handler = *(static_cast<ThreadHandler<F,ConfigurationAlg>*>(class_t));
 		handler.run();
+
 		delete &handler; 
-		return 0;
+
+		pthread_exit(0);
 		
 	}
 
@@ -360,9 +366,11 @@ class ThreadHandler {
 
 	OutputSource destroySource(){
 		
-		if(pthread_create(thread_ptr.get(), NULL,static_run,this)){
-			throw new std::bad_alloc;
+		if(int status = pthread_create(thread_ptr.get(), NULL,static_run,this)){
+			throw new std::exception();
 		}
+
+		algorithms.thread_detach_policy(*thread_ptr,id);
 		return osource;	
 	}
 
@@ -372,6 +380,7 @@ class ThreadHandler {
 
 
 		}
+
 
 };
 
