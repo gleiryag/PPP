@@ -1,31 +1,6 @@
-#include<iostream>
-#include<vector>
-#include"Pipeline.hpp"
-#include<fstream>
+#include<mainutils.hpp>
 #include <Eigen/Dense>
-
-using Eigen::Matrix;
-
-constexpr int COLLSEED =  827381;
-
-void dowork (int weight) {
-  int i0, i1;
-  int collatz;
-
-  for (i0=0; i0<weight; i0++) {
-    for (i1=0; i1<weight; i1++) {
-          collatz=COLLSEED;
-          while (collatz !=1) {
-            if (collatz%2==0) {
-              collatz = collatz/2;
-            } else {
-              collatz = 3*collatz+1;
-            }
-          }
-        }
-  }
-  return ;
-}
+#include<Timer.hpp>
 
 constexpr int w = 100;
 
@@ -34,43 +9,31 @@ int t2(int t){ dowork(w); return t*2; }
 int t3(int t){ dowork(w); return t*2; }
 int t4(int t){ dowork(w); return t+5; }
 
-void foo(Source<int> source){
-	std::cout<< source << "\n";
-}
+using Row = Eigen::Matrix<double,1,Eigen::Dynamic>;
 
-template<typename T>
-std::ostream& operator<<(std::ostream& os,std::vector<T> const & v){
-	os << "[ " ;
-	for(auto x : v) os << x << " ";
-	os << "]" ;
-	return os;
-}
+int main(int argc, char* argv[]){
 
-double computeElapsed(){
+	Timer& timer = Timer::getTimer();
 
-	 return ((Tpf->tv_sec-Tps->tv_sec)*1000000 + Tpf->tv_usec-Tps->tv_usec)/ (double)1000000;
-
-}
-
-int main(){
-
-
-
-	Tps = (struct timeval*) malloc(sizeof(struct timeval));
-	Tpf = (struct timeval*) malloc(sizeof(struct timeval));
-	Tzp = 0;
-
-	constexpr int range = 50;
-	constexpr int repteitions = 1;
+	po::variables_map vm;
 	
+	initializeArgumentMap(argc,argv,vm);
 
-	Matrix<double,1,range> results_cpu1=Matrix<double,1,range>::Zero();
-	Matrix<double,1,range> results_cpu2=Matrix<double,1,range>::Zero();
-	Matrix<double,1,range> results_cpu3=Matrix<double,1,range>::Zero();
-	Matrix<double,1,range> results_cpu4=Matrix<double,1,range>::Zero();
-	Matrix<double,1,range> serial_results=Matrix<double,1,range>::Zero();
 
-	for(int j =0;j<repteitions;j++){
+	int range = vm.count("range") ? vm["range"].as<int>() : 100 ;
+	int repetitions =  vm.count("repetitions") ? vm["repetitions"].as<int>() :   1;
+
+
+	std::cout << "Running test with range=" << range << " repetitions= " << repetitions << "\n";
+
+
+	Row results_cpu1=Eigen::VectorXd::Zero(range);
+	Row results_cpu2=Eigen::VectorXd::Zero(range);
+	Row results_cpu3=Eigen::VectorXd::Zero(range);
+	Row results_cpu4=Eigen::VectorXd::Zero(range);
+	Row serial_results=Eigen::VectorXd::Zero(range);
+
+	for(int j =0;j<repetitions;j++){
 
 		Source<int> input(true);
 
@@ -79,43 +42,43 @@ int main(){
 			input = i;	
 
 			// test CPU_1
-			gettimeofday (Tps, Tzp);
+			timer.set();
 			auto output = p_pipeline<ConditionalPinning<1>>(input,t4,t3,t2,t1);
 
 			output.wait();
 
-			double elapsed = computeElapsed();
+			double elapsed = timer.computeElapsed();
 
 			results_cpu1(0,i)+=elapsed;
 
 			// test CPU_2
 			input.reset();
-			gettimeofday (Tps, Tzp);
+			timer.set();
 			output = p_pipeline<ConditionalPinning<2>>(input,t4,t3,t2,t1);
 
 			output.wait();
 
-			elapsed = computeElapsed();
+			elapsed = timer.computeElapsed();
 			results_cpu2(0,i)+=(elapsed);
 
 			// test CPU_3
 			input.reset();
-			gettimeofday (Tps, Tzp);
+			timer.set();
 			output = p_pipeline<ConditionalPinning<3>>(input,t4,t3,t2,t1);
 
 			output.wait();
 
-			elapsed = computeElapsed();
+			elapsed = timer.computeElapsed();
 			results_cpu3(0,i)+=(elapsed);
 
 			// test CPU_4
 			input.reset();
-			gettimeofday (Tps, Tzp);
+			timer.set();
 			output = p_pipeline<ConditionalPinning<4>>(input,t4,t3,t2,t1);
 
 			output.wait();
 
-			elapsed = computeElapsed();
+			elapsed = timer.computeElapsed();
 			results_cpu4(0,i)+=(elapsed);
 
 
@@ -123,11 +86,11 @@ int main(){
 			auto data_v = input.getData();
 			auto output_v = std::vector<int>();		
 
-			gettimeofday (Tps, Tzp);
+			timer.set();
 			pipeline(data_v,std::back_inserter(output_v),t4,t3,t2,t1);
-			gettimeofday (Tpf, Tzp);
+			timer.stop();
 
-			elapsed = computeElapsed();
+			elapsed = timer.computeElapsed();
 			serial_results(0,i)+=elapsed;
 
 
@@ -139,11 +102,11 @@ int main(){
 	
 	{ 
 		std::ofstream fstream = std::ofstream("parallel_test");
-		fstream << "results_cpu1 = [ " << results_cpu1/repteitions << "];\n";
-		fstream << "results_cpu2 = [ " << results_cpu2/repteitions << "];\n";
-		fstream << "results_cpu3 = [ " << results_cpu3/repteitions << "];\n";
-		fstream << "results_cpu4 = [ " << results_cpu4/repteitions << "];\n";
-		fstream << "serial_results = [ " << serial_results/repteitions << "];\n";
+		fstream << "results_cpu1 = [ " << results_cpu1/repetitions << "];\n";
+		fstream << "results_cpu2 = [ " << results_cpu2/repetitions << "];\n";
+		fstream << "results_cpu3 = [ " << results_cpu3/repetitions << "];\n";
+		fstream << "results_cpu4 = [ " << results_cpu4/repetitions << "];\n";
+		fstream << "serial_results = [ " << serial_results/repetitions << "];\n";
 	}
 
 	
