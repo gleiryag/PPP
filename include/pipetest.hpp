@@ -1,6 +1,14 @@
-#include<mainutils.hpp>
+#include<string>
+#include <Eigen/Dense>
+#include<Timer.hpp>
+#include<iostream>
+#include<vector>
+#include<Pipeline.hpp>
+#include<fstream>
+#include <boost/program_options.hpp>
 
-std::string test_prefix = "./test_results/";
+#define PINNING_STRATEGY ConditionalPinning<1>
+constexpr int COLLSEED =  827381;
 
 void dowork (int weight) {
   int i0, i1;
@@ -43,21 +51,5 @@ void initializeArgumentMap(int argc, char* argv[],po::variables_map& vm){
 
 	po::store(po::parse_command_line(argc, argv, desc), vm);
 	po::notify(vm);
-
-}
-
-void process_results(std::string name,std::vector<Row> results){
-
-	{ 
-		std::ofstream fstream = std::ofstream(test_prefix + name + ".mat");
-
-		fstream << "results = [ ";
-		for(auto exp : results )fstream << " [ "<< exp  << " ];\n";
-		fstream << " ];";
-	
-	}
-
-
-
 
 }

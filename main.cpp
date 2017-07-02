@@ -2,7 +2,7 @@
 #include <Eigen/Dense>
 #include<Timer.hpp>
 
-constexpr int w = 100;
+constexpr int w = 500;
 
 int t1(int t){ dowork(w); return t+1; }
 int t2(int t){ dowork(w); return t*2; }
