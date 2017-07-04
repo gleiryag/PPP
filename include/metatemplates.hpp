@@ -5,11 +5,7 @@ i.e RETURN_TYPE (*)(INPUT_TYPE) or RETURN_TYPE (&)(INPUT_TYPE)
 */
 
 template<typename T>
-struct function_types{
-
-	using return_t =  void;
-	using input_t =  void;
-};
+struct function_types;
 
 template<typename T,typename R>
 struct function_types<R(*)(T)> {
@@ -25,6 +21,19 @@ struct function_types<R(&)(T)> {
 	using return_t =  R;
 	using input_t =  T;
 	
+};
+
+
+template<typename T>
+struct function_types : function_types<decltype(&T::operator())> {	
+};
+
+
+template <typename Class, typename R, typename T>
+struct function_types<R(Class::*)(T) const> {
+
+	using return_t =  R;
+	using input_t =  T;
 };
 
 /*
@@ -128,5 +137,26 @@ struct check_function_pack<T>{
 
 template<typename T, typename... Args>
 using  check_function_pack_t = typename std::enable_if<check_function_pack<Args...>::value,T>::type ;
+
+
+template<typename F>
+return_t<F> function_composition(input_t<F> input, F f ){
+		return f (input);
+	}
+
+template<typename F, typename... Functions>
+return_t<F> function_composition(unfold_input_t<Functions...> input, F f , Functions... func ){
+
+		
+		return f(function_composition(input,func...));
+
+	}
+
+
+template<typename... Functions>
+auto lambdacomposition(Functions... functions ) {
+	return [functions...] ( unfold_input_t<Functions...> input ) { return function_composition(input,functions...);  };
+}
+
 
 

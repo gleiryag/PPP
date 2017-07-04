@@ -2,9 +2,8 @@
 #include<string>
 #include<vector>
 #include<sstream>
-#include<TPipeline.hpp>
 #include<algorithm>
-
+#include<Test/TPipeline.hpp>
 class Main {
 
 

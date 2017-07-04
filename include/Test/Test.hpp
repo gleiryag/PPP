@@ -2,13 +2,15 @@
 #include<sstream>
 #include<string>
 #include<stdexcept>
-#include<Header.hpp>
-#include<Function.hpp>
-#include<Main.hpp>
-#include<PipeModifier.hpp>
 #include<set>
 #include<fstream>
 #include<iostream>
+#include<Test/Header.hpp>
+#include<Test/Function.hpp>
+#include<Test/Main.hpp>
+#include<Test/PipeModifier.hpp>
+
+
 
 class Test {
 
