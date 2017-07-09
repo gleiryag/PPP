@@ -103,9 +103,9 @@ class ThreadHandler {
 
 	public : 
 
-	ThreadHandler(InputSource& source,F f,int i) { 
+	ThreadHandler(InputSource& source,F func,int i) : f{func} { 
 
-		this->f = f;
+		//this->f = f;
 		isource=source;
 		id = i;
 		thread_ptr.reset(new pthread_t);
@@ -184,4 +184,56 @@ check_function_pack_t<Source<unfold_return_t<Functions...>>, Functions...> p_pip
 
 
 
+
+
+
+
+#include<functioncomposition.hpp>
+
+
+
+template<size_t INDEX,size_t K,typename ConfigurationAlg = DefaultPipeConfiguration,typename... Functions>
+auto k_parallel_call(std::enable_if_t<(INDEX+1)*K>=sizeof...(Functions),int> id,Source<unfold_input_t<Functions...>>& input,FunctionSequence<Functions...>& functions){
+
+	
+	constexpr size_t INIT_INDEX = INDEX*K;
+	constexpr size_t FINAL_INDEX = sizeof...(Functions)-1;	
+	auto f = functions. template stage<INIT_INDEX,FINAL_INDEX>();
+
+
+	auto handler = new ThreadHandler<decltype(f),ConfigurationAlg>(input,f,id);
+	return handler->destroySource();
+
+	
+}
+
+
+
+
+template<size_t INDEX,size_t K,typename ConfigurationAlg = DefaultPipeConfiguration,typename... Functions>
+auto k_parallel_call(std::enable_if_t<(INDEX+1)*K<sizeof...(Functions),int> id,Source<unfold_input_t<Functions...>>& input,FunctionSequence<Functions...> functions){
+
+	constexpr size_t INIT_INDEX = INDEX*K;
+	constexpr size_t FINAL_INDEX = (INDEX+1)*K-1;	
+
+
+	auto f = functions.template stage<INIT_INDEX,FINAL_INDEX>();
+
+	auto pipe_output = k_parallel_call<INDEX+1,K,ConfigurationAlg>(id+1,input,functions);
+
+	auto handler = new ThreadHandler<decltype(f),ConfigurationAlg>(pipe_output,f,id);
+	
+	return handler->destroySource();
+
+}
+
+
+
+
+
+template<size_t K,typename ConfigurationAlg = DefaultPipeConfiguration,typename... Functions>
+auto k_pipeline(Source<unfold_input_t<Functions...>>& input,Functions... functions_ptrs){
+	auto f_sequence = make_sequence(functions_ptrs...); 
+	return k_parallel_call<0,K,ConfigurationAlg>(0,input,f_sequence);
+}
 

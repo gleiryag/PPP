@@ -139,24 +139,3 @@ template<typename T, typename... Args>
 using  check_function_pack_t = typename std::enable_if<check_function_pack<Args...>::value,T>::type ;
 
 
-template<typename F>
-return_t<F> function_composition(input_t<F> input, F f ){
-		return f (input);
-	}
-
-template<typename F, typename... Functions>
-return_t<F> function_composition(unfold_input_t<Functions...> input, F f , Functions... func ){
-
-		
-		return f(function_composition(input,func...));
-
-	}
-
-
-template<typename... Functions>
-auto lambdacomposition(Functions... functions ) {
-	return [functions...] ( unfold_input_t<Functions...> input ) { return function_composition(input,functions...);  };
-}
-
-
-
