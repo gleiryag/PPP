@@ -7,7 +7,8 @@ class PipeModifier{
 	std::string name;
 	std::string option;
 	bool isParallel;
-
+	bool merge;
+	
 	public : 
 
 	PipeModifier(){
@@ -28,7 +29,16 @@ class PipeModifier{
 		this->isParallel = isParallel;
 		
 		name = isParallel ? std::string("p_pipeline") : std::string("pipeline");
-		option = isParallel ? std::string() : option;
+		this->option = isParallel ? std::string() : option;
+	}
+	
+	PipeModifier(bool merge,int val, std::string option){
+
+		this->isParallel = true;
+		this->merge = merge;
+		
+		name = merge ? std::string("k_pipeline") : std::string("pipeline");
+		this->option = merge ? std::to_string(val) + "," + option : option;
 	}
 
 

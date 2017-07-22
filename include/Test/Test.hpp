@@ -89,7 +89,7 @@ class Test {
 
 
 		std::string final_name = program_prefix + test_name;
-		std::string command = "g++ -L ./lib -I ./include -g -std=c++11 mainutils.o timer.o ./lib/libboost_program_options.a " +  final_name + ".c -o " + final_name  + " -lpthread";
+		std::string command = "g++ -O 3 -L ./lib -I ./include -g -std=c++11 mainutils.o timer.o ./lib/libboost_program_options.a " +  final_name + ".c -o " + final_name  + " -lpthread";
 		
 
 		{ 

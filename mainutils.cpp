@@ -3,19 +3,17 @@
 std::string test_prefix = "./test_results/";
 
 void dowork (int weight) {
-  int i0, i1;
+  int i0;
   int collatz;
-
+  weight *= 10; 
   for (i0=0; i0<weight; i0++) {
-    for (i1=0; i1<weight; i1++) {
-          collatz=COLLSEED;
-          while (collatz !=1) {
+		collatz=COLLSEED;
+        while (collatz !=1) {
             if (collatz%2==0) {
               collatz = collatz/2;
             } else {
               collatz = 3*collatz+1;
             }
-          }
         }
   }
   return ;
