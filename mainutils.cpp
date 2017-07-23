@@ -47,7 +47,7 @@ void initializeArgumentMap(int argc, char* argv[],po::variables_map& vm){
 void process_results(std::string name,std::vector<Row> results){
 
 	{ 
-		std::ofstream fstream = std::ofstream(test_prefix + name + ".mat");
+		std::ofstream fstream = std::ofstream(test_prefix + name + ".m");
 
 		fstream << "results = [ ";
 		for(auto exp : results )fstream << " [ "<< exp  << " ];\n";
