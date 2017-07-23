@@ -40,6 +40,8 @@ class Test {
 		test_name.append("test_");
 		test_name.append(std::to_string(pipe_size));
 		test_name.append("_");
+		test_name.append("_i"+std::to_string(i)+"_s"+std::to_string(es));
+		test_name.append("_");
 
 		if(weights.size()!= pipe_size) throw new std::invalid_argument(std::string("io size is not consistent with weight size"));
 
