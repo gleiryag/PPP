@@ -55,9 +55,9 @@ class Test {
 			Function func =  Function(input_size,output_size,weights[i],  function_prefix + std::to_string(i) );
 			functions.push_back(func );
 		}
-		std::string option = modifier.get_option();
-		option = option=="" ? "0" : option;
-		test_name.append(option);
+
+
+		test_name.append(modifier.get_name());
 		output_size = io_size.back();
 
 		TPipeline pipe = TPipeline(pipe_size,output_size,function_prefix,modifier);
@@ -89,11 +89,11 @@ class Test {
 
 
 		std::string final_name = program_prefix + test_name;
-		std::string command = "g++ -O 3 -L ./lib -I ./include -g -std=c++11 mainutils.o timer.o ./lib/libboost_program_options.a " +  final_name + ".c -o " + final_name  + " -lpthread";
+		std::string command = "g++ -O3 -L ./lib -I ./include mainutils.o timer.o ./lib/libboost_program_options.a " +  final_name + ".cpp -o " + final_name  + " -lpthread";
 		
 
 		{ 
-		std::ofstream fstream = std::ofstream(final_name + ".c");
+		std::ofstream fstream = std::ofstream(final_name + ".cpp");
 		fstream << program;
 		}
 
