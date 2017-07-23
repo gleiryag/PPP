@@ -51,7 +51,7 @@ class Test {
 			int output_size = io_size[i+1];
 
 			test_name.append(std::to_string(input_size));
-			test_name.append(".");
+			test_name.append("_");
 			Function func =  Function(input_size,output_size,weights[i],  function_prefix + std::to_string(i) );
 			functions.push_back(func );
 		}
