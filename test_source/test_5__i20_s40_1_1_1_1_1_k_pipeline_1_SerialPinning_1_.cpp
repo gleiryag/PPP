@@ -15,12 +15,13 @@ int main(){
 	INT_1 value = { 0};
 	std::vector<Row> results{};
 	Timer& timer = Timer::getTimer();
-	for(int i ; i < 20 ; i++){
+	for(int i =0 ; i < 20 ; i++){
 		Source<INT_1> input(true);
 		Row exp_results=Eigen::VectorXd::Zero(40);
 
 		for(int j = 0 ; j < 40 ; j++){
-			input.getData().push_back(value);
+			input=value;
+			input.reset();
 			timer.set();
 			auto output = k_pipeline<1,SerialPinning<1>>(input,stage_0,stage_1,stage_2,stage_3,stage_4);
 			output.wait();

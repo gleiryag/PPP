@@ -37,8 +37,6 @@ unfold_return_t<Functions...> callF(Val val, F f,Functions... functions){
 
 template<typename InputContainer,typename OutputContainer,typename... Functions>
 void pipeline(InputContainer c,std::back_insert_iterator<OutputContainer>  it,Functions... params){
-
-
 	for(auto& x : c){
 		it = callF(x,params...);
 	}
@@ -47,9 +45,6 @@ void pipeline(InputContainer c,std::back_insert_iterator<OutputContainer>  it,Fu
 
 
 /////////////////////////////////////////////// Parallel implementation
-
-
-
 
 template<typename F,typename ConfigurationAlg = DefaultPipeConfiguration>
 class ThreadHandler {
@@ -64,7 +59,6 @@ class ThreadHandler {
 	int id;
 	std::shared_ptr<pthread_t> thread_ptr;
 	
-
 	static void* static_run(void* class_t){ 
 
 		ThreadHandler& handler = *(static_cast<ThreadHandler<F,ConfigurationAlg>*>(class_t));
@@ -76,8 +70,6 @@ class ThreadHandler {
 		
 	}
 
-
-
 	void run(){
 
 		while(!isource.is_stream_done()){
@@ -88,7 +80,6 @@ class ThreadHandler {
 				osource = f(in);
 
 			}catch(std::out_of_range* e){
-
 				break;
 			}
 
@@ -98,14 +89,10 @@ class ThreadHandler {
 		
 	}
 
-	
-
-
 	public : 
 
 	ThreadHandler(InputSource& source,F func,int i) : f{func} { 
 
-		//this->f = f;
 		isource=source;
 		id = i;
 		thread_ptr.reset(new pthread_t);
@@ -126,10 +113,7 @@ class ThreadHandler {
 	}
 
 	std::ostream& print(std::ostream & os) const {
-
 			return os  << "ISOURCE-" << isource << " OSOURCE-" << osource << " ID " << thread_ptr.get() ; 
-
-
 		}
 
 

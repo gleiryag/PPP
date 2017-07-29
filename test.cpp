@@ -6,7 +6,6 @@
 
 int main(){
 
-
 	// Simple pipe test 
 	{ Test test(std::vector<int>{1,1,1,1,1,1},40,20,std::vector<int>{200,200,200,200,200},PipeModifier(false) ); test.build(); }
 	

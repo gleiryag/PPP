@@ -9,22 +9,13 @@
 struct pthread_cond_deleter{
 
 	void operator()(pthread_cond_t* ptr){
-
 		if(ptr!=nullptr){
 			pthread_cond_destroy(ptr);
 		}
-
 	}
-
-
-
 };
 
 struct pthread_mutex_deleter{
-
-
-	
-
 
 	void operator()(pthread_mutex_t* ptr){
 		if(ptr!=nullptr){
@@ -36,6 +27,18 @@ struct pthread_mutex_deleter{
 
 
 };
+
+
+
+extern pthread_mutex_t* global_mutex_ptr;
+
+void init_mutex(){
+
+		if(global_mutex_ptr==nullptr){
+			pthread_mutex_init(global_mutex_ptr,NULL);
+		}
+	return;
+}
 
 template<typename T>
 class Source {
@@ -57,34 +60,51 @@ class Source {
 
 	void waitPush(){ 
 
-
 		pthread_mutex_lock(mutex_ptr.get());
 		
 		while(!*is_stream_closed_ptr && *current_ptr==data().size() ) pthread_cond_wait(cond_ptr.get(), mutex_ptr.get());
 		pthread_mutex_unlock(mutex_ptr.get());
 		
-		if(*is_stream_closed_ptr && *current_ptr==data().size()) throw new std::out_of_range("Out of range: stream is already closed");
+		if(*is_stream_closed_ptr && *current_ptr==data().size()) throw new std::out_of_range("Out of range: stream is already closed"); //fix?
 		return;
 	}
+
 
 	public :
 
 
 		Source(Source<T> const & source){
-			
 			*this = source;
 		}
 
-		Source(bool closed) : Source() {  *is_stream_closed_ptr = closed; }
+		Source(bool closed)  {  
+			init_mutex();
+			auto container = new Container();
+			auto cond = new pthread_cond_t; 	
+			auto mutex = new pthread_mutex_t;
+			auto is_stream_closed = new bool;
+			auto current = new iterator;
+					
+			data_ptr.reset(container);
+			cond_ptr.reset(cond,pthread_cond_deleter{});
+			mutex_ptr.reset( mutex ,pthread_mutex_deleter{});
+			is_stream_closed_ptr.reset(is_stream_closed);
+			current_ptr.reset(current);
+			
+			*is_stream_closed_ptr = closed;
+			*current_ptr = 0;
+			if( pthread_cond_init(cond_ptr.get(),NULL)) throw  std::exception();
+			if( pthread_mutex_init(mutex_ptr.get(),NULL)) throw  std::exception(); }
 
 		Source(std::initializer_list<T> initializer){
+
+			init_mutex();
 
 			auto container = new Container(initializer);
 			auto cond = new pthread_cond_t; 	
 			auto mutex = new pthread_mutex_t;
 			auto is_stream_closed = new bool;
 			auto current = new iterator;
-			
 			
 			data_ptr.reset(container);
 			cond_ptr.reset(cond,pthread_cond_deleter{});
@@ -96,7 +116,6 @@ class Source {
 			*current_ptr = 0;
 			if( pthread_cond_init(cond_ptr.get(),NULL)) throw  std::exception();
 			if( pthread_mutex_init(mutex_ptr.get(),NULL)) throw  std::exception();
-			
 
 		}
 
@@ -107,7 +126,6 @@ class Source {
 			auto mutex = new pthread_mutex_t;
 			auto is_stream_closed = new bool;
 			auto current = new iterator;
-			
 			
 			data_ptr.reset(container);
 			cond_ptr.reset(cond,pthread_cond_deleter{});
@@ -125,12 +143,17 @@ class Source {
 
 		Source<T>& operator=(Source<T> const& source){
 
+			pthread_mutex_lock(global_mutex_ptr);
+
 			data_ptr = source.data_ptr;
 			cond_ptr = source.cond_ptr;
 			mutex_ptr = source.mutex_ptr;
-			is_stream_closed_ptr = source.is_stream_closed_ptr;
+			is_stream_closed_ptr = source.is_stream_closed_ptr; 
 			current_ptr = source.current_ptr;
 
+			pthread_mutex_unlock(global_mutex_ptr);
+
+			return *this;
 
 		}
 
@@ -146,14 +169,13 @@ class Source {
 
 		bool is_stream_done(){
 
-			return *is_stream_closed_ptr &&  *current_ptr==data().size();
+			return *is_stream_closed_ptr &&  *current_ptr==data().size();//fix
 
 		}
 
 
 		void wait(){
-
-
+			
 			pthread_mutex_lock(mutex_ptr.get());
 			while(!*is_stream_closed_ptr ) pthread_cond_wait(cond_ptr.get(), mutex_ptr.get());
 			pthread_mutex_unlock(mutex_ptr.get());
@@ -161,15 +183,12 @@ class Source {
 
 		}
 
-
 		Container getData() {
 			wait();
 			return data();
 
 		}
-
 		
-
 		Source<T>& operator=(const T& value){
 
 			pthread_mutex_lock(mutex_ptr.get());
@@ -178,6 +197,8 @@ class Source {
 
 			pthread_cond_broadcast(cond_ptr.get());
 			pthread_mutex_unlock(mutex_ptr.get());
+
+			
 			return *this;
 
 		}
@@ -207,8 +228,8 @@ class Source {
 		}
 
 		void reset(){
+			wait();
 			*current_ptr = 0;
 		}
-
 
 };

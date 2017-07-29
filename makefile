@@ -19,6 +19,10 @@ test : main.cpp mainutils.o timer.o
 $(TEST_NAME) : pipetest.cpp timer.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) timer.o $(LIBDIR)/libboost_program_options.a pipetest.cpp  -o $(TEST_NAME) -L $(LIBDIR) $(LINK) 
 
+test-gen: test.cpp 
+	rm test_source/*
+	g++ -I include/ -L lib/ test.cpp -o test
+	./test
 
 all: test $(TEST_NAME)
 	rm *.o

@@ -47,7 +47,7 @@ class Main {
 
 		stream.append("\tstd::vector<Row> results{};\n");
 		stream.append("\tTimer& timer = Timer::getTimer();\n");
-		stream.append("\tfor(int i ; i < " );
+		stream.append("\tfor(int i =0 ; i < " );
 		stream.append(std::to_string(iterations) );
 		stream.append(" ; i++){\n\t\t");
 
@@ -66,8 +66,14 @@ class Main {
 		stream.append("\t\tfor(int j = 0 ; j < ");
 		stream.append(std::to_string(experiment_size) );
 		stream.append(" ; j++){\n");
-		std::string input_accces =  ( pipe.is_parallel() ? "getData()." : "" );
-		stream.append("\t\t\tinput." + input_accces + "push_back(value);\n");
+
+		if(pipe.is_parallel()){
+			stream.append("\t\t\tinput=value;\n");
+			stream.append("\t\t\tinput.reset();\n");
+		}else {
+			stream.append("\t\t\tinput.push_back(value);\n");
+		}
+
 		stream.append("\t\t\ttimer.set();\n\t\t\t");
 		pipe.build(stream);
 		stream.append("\t\t\tdouble elapsed = timer.computeElapsed();\n");
