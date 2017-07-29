@@ -35,6 +35,7 @@ extern pthread_mutex_t* global_mutex_ptr;
 void init_mutex(){
 
 		if(global_mutex_ptr==nullptr){
+			global_mutex_ptr = new pthread_mutex_t;
 			pthread_mutex_init(global_mutex_ptr,NULL);
 		}
 	return;
