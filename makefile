@@ -21,9 +21,15 @@ $(TEST_NAME) : pipetest.cpp timer.o
 
 test-gen: test.cpp 
 	rm test_source/*
-	g++ -I include/ -L lib/ test.cpp -o test
-	./test
-
+	g++ -I include/ -L lib/ Test_w10.cpp -o Test_w10
+	g++ -I include/ -L lib/ Test_w100.cpp -o Test_w100
+	g++ -I include/ -L lib/ Test_w250.cpp -o Test_w250
+	g++ -I include/ -L lib/ Test_w500.cpp -o Test_w500
+	./Test_w10
+	./Test_w100
+	./Test_w250
+	./Test_w500
+	
 all: test $(TEST_NAME)
 	rm *.o
 clean:
