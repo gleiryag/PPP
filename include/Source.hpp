@@ -144,7 +144,7 @@ class Source {
 
 		Source<T>& operator=(Source<T> const& source){
 
-			pthread_mutex_lock(global_mutex_ptr);
+			// pthread_mutex_lock(global_mutex_ptr);
 
 			data_ptr = source.data_ptr;
 			cond_ptr = source.cond_ptr;
@@ -152,7 +152,7 @@ class Source {
 			is_stream_closed_ptr = source.is_stream_closed_ptr; 
 			current_ptr = source.current_ptr;
 
-			pthread_mutex_unlock(global_mutex_ptr);
+			// pthread_mutex_unlock(global_mutex_ptr);
 
 			return *this;
 
