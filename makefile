@@ -20,7 +20,7 @@ $(TEST_NAME) : pipetest.cpp timer.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) timer.o $(LIBDIR)/libboost_program_options.a pipetest.cpp  -o $(TEST_NAME) -L $(LIBDIR) $(LINK) 
 
 test-gen: test.cpp 
-	rm test_source/*
+	rm -f test_source/*
 	g++ -I include/ -L lib/ Test_w10.cpp -o Test_w10
 	g++ -I include/ -L lib/ Test_w100.cpp -o Test_w100
 	g++ -I include/ -L lib/ Test_w250.cpp -o Test_w250
