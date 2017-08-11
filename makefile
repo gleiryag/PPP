@@ -23,10 +23,7 @@ test-gen: test.cpp
 	rm -f test_source/*
 	g++ -I include/ -L lib/ Test_w10.cpp -o Test_w10
 	./Test_w10
-
-	g++ -I include/ -L lib/ Test_w10.cpp -o Test_w100
-	./Test_w100
-
+	
 all: test $(TEST_NAME)
 	rm *.o
 clean:
