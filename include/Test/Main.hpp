@@ -15,16 +15,19 @@ class Main {
 	std::string stabs;
 	bool applyTabs;
 	std::string name;
+	int range;
+
 	public : 
 
 	Main(){ return; };
 
-	Main(int es, int it,TPipeline p, int sz,std::string name) {
+	Main(int es, int it,int range,TPipeline p, int sz,std::string name) {
 		experiment_size = es;
 		iterations = it;
 		pipe = p;
 		source_size=sz;	
 		this->name = name;
+		this->range = range;
 	}
 
 	void build(std::string& stream){
@@ -68,7 +71,7 @@ class Main {
 		stream.append(" ; j++){\n");
 
 		if(pipe.is_parallel()){
-			stream.append("\t\t\tinput=value;\n");
+			stream.append("\t\t\tinput.append(value,"+ std::to_string(range) +");\n");
 			stream.append("\t\t\tinput.reset();\n");
 		}else {
 			stream.append("\t\t\tinput.push_back(value);\n");

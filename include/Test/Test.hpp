@@ -30,7 +30,7 @@ class Test {
 
 	
 
-	Test(std::vector<int> io_size,int es,int i,std::vector<int> weights,PipeModifier modifier){
+	Test(std::vector<int> io_size,int es,int i,int range,std::vector<int> weights,PipeModifier modifier){
 
 		if(io_size.size()<2) throw new std::invalid_argument(std::string("io_size size must be at least 2"));
 
@@ -67,14 +67,15 @@ class Test {
 
 		TPipeline pipe = TPipeline(pipe_size,output_size,function_prefix,modifier);
 
-
 		for(auto i : io_size) this->typedefs.insert(i);
 
-		main = Main(es,i,pipe,source_size,test_name);
+		main = Main(es,i,range,pipe,source_size,test_name);
 
 		
 
 	}
+
+	std::string get_name(){ return test_name; }
 
 	void build(){
 		

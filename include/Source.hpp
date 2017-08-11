@@ -29,18 +29,6 @@ struct pthread_mutex_deleter{
 };
 
 
-
-extern pthread_mutex_t* global_mutex_ptr;
-
-void init_mutex(){
-
-		if(global_mutex_ptr==nullptr){
-			global_mutex_ptr = new pthread_mutex_t;
-			pthread_mutex_init(global_mutex_ptr,NULL);
-		}
-	return;
-}
-
 template<typename T>
 class Source {
 
@@ -79,7 +67,7 @@ class Source {
 		}
 
 		Source(bool closed)  {  
-			init_mutex();
+
 			auto container = new Container();
 			auto cond = new pthread_cond_t; 	
 			auto mutex = new pthread_mutex_t;
@@ -98,8 +86,6 @@ class Source {
 			if( pthread_mutex_init(mutex_ptr.get(),NULL)) throw  std::exception(); }
 
 		Source(std::initializer_list<T> initializer){
-
-			init_mutex();
 
 			auto container = new Container(initializer);
 			auto cond = new pthread_cond_t; 	
@@ -144,15 +130,12 @@ class Source {
 
 		Source<T>& operator=(Source<T> const& source){
 
-			// pthread_mutex_lock(global_mutex_ptr);
-
 			data_ptr = source.data_ptr;
 			cond_ptr = source.cond_ptr;
 			mutex_ptr = source.mutex_ptr;
 			is_stream_closed_ptr = source.is_stream_closed_ptr; 
 			current_ptr = source.current_ptr;
 
-			// pthread_mutex_unlock(global_mutex_ptr);
 
 			return *this;
 
@@ -202,6 +185,13 @@ class Source {
 			
 			return *this;
 
+		}
+
+		void append(const T& value,int n){
+
+			for(int i =0; i < n ; i++){
+				operator=(value);
+			}
 		}
 
 		const T next(){
