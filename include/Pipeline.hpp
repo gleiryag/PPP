@@ -40,6 +40,7 @@ void pipeline(InputContainer c,std::back_insert_iterator<OutputContainer>  it,Fu
 	for(auto& x : c){
 		it = callF(x,params...);
 	}
+	Timer::getTimer().stop(); 
 	return;
 }
 
@@ -64,27 +65,29 @@ class ThreadHandler {
 		ThreadHandler& handler = *(static_cast<ThreadHandler<F,ConfigurationAlg>*>(class_t));
 		handler.run();
 
-		delete &handler; 
-		Timer::getTimer().stop(); 
+		delete &handler;
 		pthread_exit(0);
 		
 	}
 
 	void run(){
-
+		
+		
 		while(!isource.is_stream_done()){
 
 			try {
 
 				input_t<F> in = isource.next();
 				osource = f(in);
-
+				
+				
 			}catch(std::out_of_range* e){
+				
 				break;
 			}
-
+			
 		}
-
+		Timer::getTimer().stop();  
 		osource.end_stream();
 		
 	}
@@ -103,7 +106,7 @@ class ThreadHandler {
 	
 
 	OutputSource destroySource(){
-		
+
 		if(int status = pthread_create(thread_ptr.get(), NULL,static_run,this)){
 			throw new std::exception();
 		}

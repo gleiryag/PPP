@@ -61,7 +61,7 @@ class Main {
 		stream.append("<INT_");
 		stream.append(std::to_string(source_size) );
 		stream.append("> input");
-		if(pipe.is_parallel()) stream.append("(true);\n"); 
+		if(pipe.is_parallel()) stream.append("{value,value};\n"); 
 		else stream.append(";\n");
 		stream.append("\t\tRow exp_results=Eigen::VectorXd::Zero(");
 		stream.append(std::to_string(experiment_size) );
@@ -79,7 +79,6 @@ class Main {
 
 		stream.append("\t\t\ttimer.set();\n\t\t\t");
 		pipe.build(stream);
-		if(!pipe.is_parallel()) stream.append("\t\t\ttimer.stop();\n");
 		stream.append("\t\t\tdouble elapsed = timer.computeElapsed();\n");
 		stream.append("\t\t\texp_results(0,j)=elapsed;\n"); 
 		stream.append("\t\t}\n\t\tresults.push_back(exp_results);\n\t");

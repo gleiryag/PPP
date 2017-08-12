@@ -16,7 +16,7 @@ int main(){
 	std::vector<Row> results{};
 	Timer& timer = Timer::getTimer();
 	for(int i =0 ; i < 5 ; i++){
-		Source<INT_1> input(true);
+		Source<INT_1> input{value,value};
 		Row exp_results=Eigen::VectorXd::Zero(5);
 
 		for(int j = 0 ; j < 5 ; j++){

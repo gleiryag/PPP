@@ -24,7 +24,6 @@ int main(){
 			timer.set();
 			auto output = std::vector<INT_1>();
 pipeline(input,std::back_inserter(output),stage_0,stage_1,stage_2,stage_3,stage_4);
-			timer.stop();
 			double elapsed = timer.computeElapsed();
 			exp_results(0,j)=elapsed;
 		}
