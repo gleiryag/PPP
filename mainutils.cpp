@@ -21,7 +21,7 @@ void dowork (int weight) {
 template<typename T>
 std::ostream& operator<<(std::ostream& os,std::vector<T> const & v){
 	os << "[ " ;
-	for(auto x : v) os << x << " ";
+	for(auto x : v) os << x << ",";
 	os << "]" ;
 	return os;
 }
@@ -46,9 +46,9 @@ void process_results(std::string name,std::vector<Row> results){
 	{ 
 		std::ofstream fstream = std::ofstream(test_prefix + name + ".m");
 
-		fstream << "results = [ ";
-		for(auto exp : results )fstream << " [ "<< exp  << " ];\n";
-		fstream << " ];";
+		fstream << "[ ";
+		for(auto exp : results )fstream << " [ "<< exp  << " ],\n";
+		fstream << " ],";
 	
 	}
 

@@ -79,6 +79,7 @@ class Main {
 
 		stream.append("\t\t\ttimer.set();\n\t\t\t");
 		pipe.build(stream);
+		if(!pipe.is_parallel()) stream.append("\t\t\ttimer.stop();\n");
 		stream.append("\t\t\tdouble elapsed = timer.computeElapsed();\n");
 		stream.append("\t\t\texp_results(0,j)=elapsed;\n"); 
 		stream.append("\t\t}\n\t\tresults.push_back(exp_results);\n\t");
