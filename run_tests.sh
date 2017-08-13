@@ -1,6 +1,15 @@
 #!/bin/bash
 
 test_names=("w2" "w6" "w10")
+test=$1
+
+
+if [ $test != '' ]
+then
+	test_names=($test)
+fi
+
+
 for name in "${test_names[@]}"
 do
 	for file in $(ls test_source/*$name*.cpp); do
