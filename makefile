@@ -23,11 +23,16 @@ test-gen: test.cpp
 	rm -f test_source/*
 	g++ -I include/ -L lib/ Test_w2.cpp -o Test_w2
 	./Test_w2
+	echo "w2 compiled"
 	g++ -I include/ -L lib/ Test_w6.cpp -o Test_w6
 	./Test_w6
+	echo "w6 compiled"
 	g++ -I include/ -L lib/ Test_w10.cpp -o Test_w10
 	./Test_w10
-	
+	echo "w10 compiled"
+	g++ -I include/ -L lib/ Test_w10.cpp -o Test_w100
+	./Test_w100
+	echo "w100 compiled"
 all: test $(TEST_NAME)
 	rm *.o
 clean:

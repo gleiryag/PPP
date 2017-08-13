@@ -74,7 +74,7 @@ class Main {
 			stream.append("\t\t\tinput.append(value,"+ std::to_string(range) +");\n");
 			stream.append("\t\t\tinput.reset();\n");
 		}else {
-			stream.append("\t\t\tinput.push_back(value);\n");
+			stream.append("\t\t\tfill(input,value,"+std::to_string(range) +")\n");
 		}
 
 		stream.append("\t\t\ttimer.set();\n\t\t\t");

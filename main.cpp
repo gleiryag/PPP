@@ -2,7 +2,7 @@
 #include <Eigen/Dense>
 #include<Timer.hpp>
 
-constexpr int w = 500;
+constexpr int w = 100;
 
 int t1(int t){ dowork(w); return t+1; }
 int t2(int t){ dowork(w); return t*2; }
@@ -13,25 +13,17 @@ using Row = Eigen::Matrix<double,1,Eigen::Dynamic>;
 
 int main(int argc, char* argv[]){
 
-	Timer& timer = Timer::getTimer();
-
-	po::variables_map vm;
-	
-	initializeArgumentMap(argc,argv,vm);
-
-
-	int range = vm.count("range") ? vm["range"].as<int>() : 100 ;
-	int repetitions =  vm.count("repetitions") ? vm["repetitions"].as<int>() :   1;
-
-
-	std::cout << "Running test with range=" << range << " repetitions= " << repetitions << "\n";
-
+	int range = 20;
+	int increments = 10;
+	int repetitions = 10;
 
 	Row results_cpu1=Eigen::VectorXd::Zero(range);
 	Row results_cpu2=Eigen::VectorXd::Zero(range);
 	Row results_cpu3=Eigen::VectorXd::Zero(range);
 	Row results_cpu4=Eigen::VectorXd::Zero(range);
 	Row serial_results=Eigen::VectorXd::Zero(range);
+
+	Timer& timer = Timer::getTimer();
 
 	for(int j =0;j<repetitions;j++){
 
@@ -88,11 +80,11 @@ int main(int argc, char* argv[]){
 
 			timer.set();
 			pipeline(data_v,std::back_inserter(output_v),t4,t3,t2,t1);
-			timer.stop();
 
 			elapsed = timer.computeElapsed();
 			serial_results(0,i)+=elapsed;
-
+		
+			input.append(0,increments);
 
 			std::cout << "ite " << j << " test " << i << "\n";
 		}

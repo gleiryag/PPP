@@ -27,20 +27,6 @@ std::ostream& operator<<(std::ostream& os,std::vector<T> const & v){
 }
 
 
-void initializeArgumentMap(int argc, char* argv[],po::variables_map& vm){
-	
-	po::options_description desc("Allowed options");
-	desc.add_options() ("help", "produce help message")
-        ("range", po::value<int>() , "set max size of the testing vector in each experiment")
-        ("repetitions", po::value<int>() ,"set the number of repetitions in the experiment")
-
-	;
-
-	po::store(po::parse_command_line(argc, argv, desc), vm);
-	po::notify(vm);
-
-}
-
 void process_results(std::string name,std::vector<Row> results){
 
 	{ 
