@@ -14,7 +14,7 @@ using Row = Eigen::Matrix<double,1,Eigen::Dynamic>;
 void dowork (int weight);
 
 template<typename T>
-void fill(std::vector<T> vec,T val,int k){
+void fill(std::vector<T>& vec,T val,int k){
 
 
 	for(int i = 0 ; i < k ; i++) vec.push_back(val);
