@@ -12,7 +12,7 @@ fi
 
 for name in "${test_names[@]}"
 do
-	for file in $(ls test_source/*$name*.cpp); do
+	for file in $(ls test_source/*$name"_"*.cpp); do
         	to_run=./$(echo $file | sed s/[.]cpp//)
 		echo "Running test $to_run"
 		$to_run

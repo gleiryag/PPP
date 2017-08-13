@@ -20,7 +20,7 @@ int main(){
 		Row exp_results=Eigen::VectorXd::Zero(5);
 
 		for(int j = 0 ; j < 5 ; j++){
-			input.push_back(value);
+			fill(input,value,100);
 			timer.set();
 			auto output = std::vector<INT_1>();
 pipeline(input,std::back_inserter(output),stage_0,stage_1,stage_2,stage_3,stage_4);
